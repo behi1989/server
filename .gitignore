@@ -39,7 +39,6 @@ Thumbs.db
 .env
 
 # public folder
-/public
 
 # docker compose file
 docker-compose.yml
