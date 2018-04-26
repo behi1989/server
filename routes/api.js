@@ -166,9 +166,14 @@ router.post('/customer/shoesType', apiResponse('Customer', 'setCustomerShoesType
 router.get('/orders', apiResponse('Order', 'getOrders', false, ['user']));
 router.post('/order', apiResponse('Order', 'addToOrder', false, ['user', 'body']));
 router.post('/order/delete', apiResponse('Order', 'removeFromOrder', false, ['user', 'body']));
-router.post('/order/ticket/:type', apiResponse('Order', 'setTicket', true, ['params.type', 'body', 'user'], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.ShopClerk]));
-router.post('/order/ticket/offline/requestInvoice', apiResponse('Order', 'resendInvoiceRequest', true, ['body', 'user'], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.ShopClerk]));
-router.post('/order/ticket/offline/verifyInvoice', apiResponse('Order', 'verifyInvoice', false, ['body']));
+router.post('/order/ticket/:type', apiResponse('Order', 'setManualTicket', true, ['params.type', 'body', 'user'], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.ShopClerk]));
+
+// api's used by offline system
+router.post('/order/offline/verifyInvoice', apiResponse('Offline', 'verifyInvoice', false, ['body']));
+router.post('/order/offline/verifyOnlineWarehouse', apiResponse('Offline', 'verifyOnlineWarehouse', false, ['body']));
+
+// Wish List
+router.post('/wishlist', apiResponse('Customer', 'AddToWishList', false, ['user', 'body']));
 
 // product
 router.get('/product/:id', apiResponse('Product', 'getProduct', false, ['params.id']));
@@ -207,6 +212,7 @@ router.use('/product/image/:id/:colorId/:is_thumbnail', function (req, res, next
   else
     destination = env.uploadProductImagePath + path.sep + req.params.id + path.sep + req.params.colorId;
 
+
   let productStorage = multer.diskStorage({
     destination,
     filename: (req, file, cb) => {
@@ -214,10 +220,11 @@ router.use('/product/image/:id/:colorId/:is_thumbnail', function (req, res, next
       const parts = file.originalname.split('.');
 
       if (!parts || parts.length !== 2) {
+
         cb(new Error('count not read file extension'));
       }
       else {
-        cb(null, parts[0] + '-' + Date.now() + '.'+ parts[1]);
+        cb(null, parts[0] + '-' + Date.now() + '.' + parts[1]);
       }
     }
   });
@@ -231,8 +238,6 @@ router.use('/product/image/:id/:colorId/:is_thumbnail', function (req, res, next
 });
 router.post('/product/image/:id/:colorId/:is_thumbnail', apiResponse('Product', 'setImage', true, ['params.id', 'params.colorId', 'params.is_thumbnail', 'file'], [_const.ACCESS_LEVEL.ContentManager]));
 router.post('/product/image/:id/:colorId', apiResponse('Product', 'removeImage', true, ['params.id', 'params.colorId', 'body.angle'], [_const.ACCESS_LEVEL.ContentManager]));
-
-
 
 
 // Collection
@@ -279,18 +284,23 @@ router.use('/uploadData', function (req, res, next) {
   else
     destination = env.uploadExcelPath + fileName;
 
-  let productStorage = multer.diskStorage({
-    destination,
-    filename: (req, file, cb) => {
-      cb(null, file.originalname);
-    }
-  });
-  let productUpload = multer({storage: productStorage});
+  const rmPromise = require('rimraf-promise');
+  rmPromise(env.uploadExcelPath)
+    .then(res => {
+      let productStorage = multer.diskStorage({
+        destination,
+        filename: (req, file, cb) => {
+          cb(null, file.originalname);
+        }
+      });
+      let productUpload = multer({storage: productStorage});
 
-  productUpload.single('file')(req, res, err => {
-    if (!err)
-      next()
-  });
+      productUpload.single('file')(req, res, err => {
+        if (!err)
+          next()
+      });
+    }).catch(err => {
+    });
 
 });
 
@@ -340,10 +350,6 @@ router.use('/placement/image/:pageId/:placementId', function (req, res, next) {
 })
 router.post('/placement/image/:pageId/:placementId', apiResponse('Page', 'addImage', true, ['params', 'body', 'file', 'is_new', 'new_placement_id'], [_const.ACCESS_LEVEL.ContentManager]));
 
-// temp apis
-
-// todo: must be removed
-router.post('/order/verify', apiResponse('Order', 'verifyOrder', false, ['body.orderId', 'body.transactionId', 'body.usedPoints', 'body.usedBalance']));
-
-
+// checkout
+router.post('/checkout', apiResponse('Order', 'checkoutCart', false, ['user', 'body.cartItems', 'body.order_id', 'body.address', 'body.customerData', 'body.transaction_id', 'body.used_point', 'body.used_balance', 'body.total_amount', 'body.is_collect']));
 module.exports = router;
