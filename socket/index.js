@@ -75,6 +75,7 @@ let setRoom = (socket, name) => {
  */
 let sendToNS = (name, message) => {
 
+  name = name.toString();
   if (!message.type || !message.data)
     return Promise.reject(error.invalidSocketMessageType);
 
