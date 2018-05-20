@@ -166,11 +166,11 @@ router.post('/customer/shoesType', apiResponse('Customer', 'setCustomerShoesType
 router.get('/orders', apiResponse('Order', 'getOrders', false, ['user']));
 router.post('/order', apiResponse('Order', 'addToOrder', false, ['user', 'body']));
 router.post('/order/delete', apiResponse('Order', 'removeFromOrder', false, ['user', 'body']));
-router.post('/order/ticket/:type', apiResponse('Order', 'setManualTicket', true, ['params.type', 'body', 'user'], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.ShopClerk]));
+router.post('/order/ticket/:type', apiResponse('Order', 'setManualTicket', true, ['params.type', 'body', 'user'], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.Clerk]));
 
 // Order => direct request to offline system
-router.post('/order/offline/requestInvoice', apiResponse('Offline', 'manualRequestInvoice', true, ['body.orderId', 'body.orderLineId', 'user'], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.ShopClerk]));
-router.post('/order/offline/requestOnlineWarehouse', apiResponse('Offline', 'manualRequestOnlineWarehouse', true, ['body.orderId', 'body.orderLineId', 'user'], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.ShopClerk]));
+router.post('/order/offline/requestInvoice', apiResponse('Offline', 'manualRequestInvoice', true, ['body.orderId', 'body.orderLineId', 'user'], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.Clerk]));
+router.post('/order/offline/requestOnlineWarehouse', apiResponse('Offline', 'manualRequestOnlineWarehouse', true, ['body.orderId', 'body.orderLineId', 'user'], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.Clerk]));
 
 // Order => api's used by offline system
 router.post('/order/offline/verifyInvoice', apiResponse('Offline', 'verifyInvoice', false, ['body']));

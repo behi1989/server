@@ -1,6 +1,6 @@
 const Schema = require('mongoose').Schema;
 let schema_obj = {
-  warehouse_id: Schema.Types.ObjectId,
+  reciever_id: Schema.Types.ObjectId,
   status: Number,
   desc: String,
   timestamp: {type: Date, default: Date.now},

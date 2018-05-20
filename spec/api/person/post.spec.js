@@ -5,6 +5,7 @@ const error = require('../../../lib/errors.list');
 const moment = require('moment');
 const _const = require('../../../lib/const.list');
 const mongoose = require('mongoose');
+const warehouses = require('../../../warehouses');
 
 describe('Person POST API', () => {
   let warehouseId1, warehouseId2, warehouseId3;
@@ -46,7 +47,7 @@ describe('Person POST API', () => {
           secret: '123456',
           mobile_no: '09391999852',
           gender: 'f',
-          access_level: _const.ACCESS_LEVEL.ShopClerk,
+          access_level: _const.ACCESS_LEVEL.Clerk,
           is_verified: true,
         });
       })
@@ -87,47 +88,7 @@ describe('Person POST API', () => {
         warehouseId2 = mongoose.Types.ObjectId();
         warehouseId3 = mongoose.Types.ObjectId();
 
-        let warehouses = [
-          {
-            _id: warehouseId1,
-            name: 'انبار مرکزی',
-            phone: 'نا مشخص',
-            address: {
-              city: 'تهران',
-              street: 'نامشخص',
-              province: 'تهران'
-            },
-            is_center: true,
-            priority: 0,
-  
-          },
-          {
-            _id: warehouseId2,
-            name: 'پالادیوم',
-            phone: ' 021 2201 0600',
-            has_customer_pickup: true,
-            address: {
-              city: 'تهران',
-              street: 'مقدس اردبیلی',
-              province: 'تهران'
-            },
-            priority: 1,
-  
-          },
-          {
-            _id: warehouseId3,
-            name: 'سانا',
-            phone: '021 7443 8111',
-            has_customer_pickup: true,
-            address: {
-              province: 'تهران',
-              city: 'تهران',
-              street: 'اندرزگو',
-            },
-            priority: 2,
-          }
-        ];
-  
+     
         return models['WarehouseTest'].insertMany(warehouses);
       })
       .then(res => {
@@ -193,7 +154,7 @@ describe('Person POST API', () => {
       body: {
         username: 'sc@gmail.com',
         password: '123456',
-        loginType: _const.ACCESS_LEVEL.ShopClerk,
+        loginType: _const.ACCESS_LEVEL.Clerk,
         warehouse_id: warehouseId2,
       },
       json: true,
@@ -204,7 +165,7 @@ describe('Person POST API', () => {
         expect(res.statusCode).toBe(200);
         expect(res.body.username).toBe('sc@gmail.com');
         expect(res.body.personType).toBe('agent');
-        expect(res.body.access_level).toBe(_const.ACCESS_LEVEL.ShopClerk);
+        expect(res.body.access_level).toBe(_const.ACCESS_LEVEL.Clerk);
         done();
       })
       .catch(lib.helpers.errorHandler.bind(this));
