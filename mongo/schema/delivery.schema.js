@@ -51,7 +51,8 @@ let schema_obj = {
   },
   created_at: Date,
   start_date: Date,
-  end_date: Date
+  end_date: Date,
+  shelf_code: String
 };
 
 let DeliverySchema = new Schema(schema_obj, {collection: 'delivery', strict: true});
