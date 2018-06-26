@@ -387,6 +387,7 @@ router.post('/loyaltygroup/delete', apiResponse('LoyaltyGroup', 'deleteLoyaltyGr
 router.post('/delivery/items/:offset/:limit', apiResponse('Delivery', 'getDeliveryItems', true, ['user', 'body'], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.ShopClerk, _const.ACCESS_LEVEL.HubClerk]));
 router.get('/delivery/agent', apiResponse('Agent', 'getDeliveryAgents', true, [], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.ShopClerk, _const.ACCESS_LEVEL.HubClerk]));
 router.post('/delivery', apiResponse('Delivery', 'updateDelivery', true, ['user', 'body'], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.ShopClerk, _const.ACCESS_LEVEL.HubClerk]));
+router.get('/delivery/:id', apiResponse('Delivery', 'getDeliveryData', false, ['params.id']));
 
 // Delivery Duration
 router.get('/deliveryduration', apiResponse('DeliveryDurationInfo', 'getAllDurationInfo', true, [], [_const.ACCESS_LEVEL.SalesManager]));
