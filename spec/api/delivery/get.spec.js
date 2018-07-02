@@ -9,12 +9,61 @@ const warehouses = require('../../../warehouses');
 describe("it should get delivery's data", () => {
   let deliveries;
   let hub_id;
-  let deliveries_id;
+  let centerWareHouse_id;
+  let customers;
   beforeEach(done => {
     lib.dbHelpers.dropAll().then(() => {
       return models['WarehouseTest'].insertMany(warehouses)
     }).then((res) => {
+      centerWareHouse_id = res.find(w => !w.has_customer_pickup && !w.is_hub);
       hub_id = res.find(w => w.is_hub === true)._id;
+      customers = [
+        {
+          _id: mongoose.Types.ObjectId(),
+          first_name: "ali",
+          surname: "mirj",
+          username: "ams",
+          is_verified: true,
+          addresses: [
+            {
+              _id: mongoose.Types.ObjectId(),
+              province: "tehran",
+              city: "tehran",
+              street: "fatemi"
+            },
+            {
+              _id: mongoose.Types.ObjectId(),
+              city: "rasht",
+              province: "rasht",
+              street: "rashtAbad"
+            }
+          ]
+
+        },
+        {
+          _id: mongoose.Types.ObjectId(),
+          first_name: "ali2",
+          surname: "mirj2",
+          username: "ams2",
+          is_verified: true,
+          addresses: [
+            {
+              _id: mongoose.Types.ObjectId(),
+              city: "tehran2",
+              province: "tehran2",
+              street: "fatemi2"
+            },
+            {
+              _id: mongoose.Types.ObjectId(),
+              city: "rasht2",
+              province: "rasht2",
+              street: "rashtAbad2"
+            }
+          ]
+        },
+      ];
+      return models['CustomerTest'].insertMany(customers)
+    }).then(() => {
       deliveries = [
         {
           _id: mongoose.Types.ObjectId(),
@@ -23,7 +72,12 @@ describe("it should get delivery's data", () => {
             order_line_ids: [mongoose.Types.ObjectId(), mongoose.Types.ObjectId()]
           },
           from: {warehouse_id: hub_id},
-          to: {warehouse_id: mongoose.Types.ObjectId()},
+          to: {
+            customer: {
+              id: customers[0]._id,
+              address_id: customers[0].addresses[0]._id,
+            }
+          },
           shelf_code: "AZ",
         },
         {
@@ -33,7 +87,7 @@ describe("it should get delivery's data", () => {
             order_line_ids: [mongoose.Types.ObjectId(), mongoose.Types.ObjectId()]
           },
           from: {warehouse_id: hub_id},
-          to: {warehouse_id: mongoose.Types.ObjectId()},
+          to: {warehouse_id: centerWareHouse_id},
           shelf_code: "AA",
         },
         {
@@ -42,22 +96,26 @@ describe("it should get delivery's data", () => {
             order_id: mongoose.Types.ObjectId(),
             order_line_ids: [mongoose.Types.ObjectId(), mongoose.Types.ObjectId()]
           },
-          from: {warehouse_id: mongoose.Types.ObjectId()},
+          from: {warehouse_id: centerWareHouse_id},
           to: {warehouse_id: hub_id},
           shelf_code: "BA",
         },
         {
+          shelf_code: "CC",
           _id: mongoose.Types.ObjectId(),
           order_details: {
             order_id: mongoose.Types.ObjectId(),
             order_line_ids: [mongoose.Types.ObjectId(), mongoose.Types.ObjectId()]
           },
-          from: {warehouse_id: hub_id},
-          to: {warehouse_id: mongoose.Types.ObjectId()},
-
+          from: {
+            customer: {
+              id: customers[1]._id,
+              address_id: customers[1].addresses[1]._id,
+            }
+          },
+          to: {warehouse_id: centerWareHouse_id},
         }
       ];
-      deliveries_id = deliveries.map(d => d._id);
       return models['DeliveryTest'].insertMany(deliveries)
     }).then(() => {
       done();
@@ -67,21 +125,42 @@ describe("it should get delivery's data", () => {
     });
   });
 
-  it("should get this delivery's data", function (done) {
+  xit("should get this delivery's data from delivery that gonna send from warehouse to warehouse", function (done) {
     this.done = done;
     rp({
       method: 'get',
-      uri: lib.helpers.apiTestURL(`delivery/${deliveries_id[1]}`),
+      uri: lib.helpers.apiTestURL(`delivery/${deliveries[1]._id}`),
       resolveWithFullResponse: true
     }).then(res => {
       expect(res.statusCode).toBe(200);
       let result = JSON.parse(res.body)[0];
-      expect(mongoose.Types.ObjectId(result._id).toString()).toBe(deliveries_id[1].toString());
-      expect(result.to.toString()).toBe(deliveries[1].to.toString());
-      expect(result.from.toString()).toBe(deliveries[1].from.toString());
+      console.log(JSON.stringify(result, undefined, 2));
+      expect(result.to.warehouse[0].name).toBe(warehouses.find(x => !x.is_hub && !x.has_customer_pickup).name);
+      expect(result.from.warehouse[0].name).toBe(warehouses.find(x => x.is_hub).name);
+      expect(result.shelf_code).toBe(deliveries[1].shelf_code);
+      expect(mongoose.Types.ObjectId(result._id).toString()).toBe(deliveries[1]._id.toString());
       done();
     }).catch(lib.helpers.errorHandler.bind(this));
   });
 
+  it("should get this delivery's data from delivery that gonna send from warehouse to warehouse", function (done) {
+    this.done = done;
+    rp({
+      method: 'get',
+      uri: lib.helpers.apiTestURL(`delivery/${deliveries[0]._id}`),
+      resolveWithFullResponse: true
+    }).then(res => {
+      expect(res.statusCode).toBe(200);
+      let result = JSON.parse(res.body)[0];
+      console.log(JSON.stringify(result, undefined, 2));
+      expect(result.from.warehouse[0].name).toBe(warehouses.find(x => x.is_hub).name);
+      expect(result.to.customer[0].name).toBe(customers[0].name);
+      expect(result.to.customer[0].address_id).toBe(customers[0].addresses[0]._id);
+      expect(result.shelf_code).toBe(deliveries[0].shelf_code);
+      expect(mongoose.Types.ObjectId(result._id).toString()).toBe(deliveries[0]._id.toString());
+      done();
+    }).catch(lib.helpers.errorHandler.bind(this));
+  });
 
-});
+})
+;
