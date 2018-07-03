@@ -57,7 +57,7 @@ describe('making shelf code', () => {
         }
       ];
 
-      deliveries_id=deliveries.map(d=>d._id);
+      deliveries_id = deliveries.map(d => d._id);
       return models['DeliveryTest'].insertMany(deliveries)
     }).then(() => {
       done();
@@ -71,10 +71,11 @@ describe('making shelf code', () => {
     this.done = done;
     let delivery = new Delivery(true);
     delivery.makeDeliveryShelfCode(deliveries_id[3]).then(data => {
-      expect(data).toNotBe("AA");
-      expect(data).toBe("AB");
-      expect(data).toNotBe("AZ");
-      expect(data.length).toBe(2);
+      expect(data.exist).toBe(false);
+      expect(data.shelf_code).toNotBe("AA");
+      expect(data.shelf_code).toBe("AB");
+      expect(data.shelf_code).toNotBe("AZ");
+      expect(data.shelf_code.length).toBe(2);
       done();
     });
   });
@@ -83,8 +84,9 @@ describe('making shelf code', () => {
     this.done = done;
     let delivery = new Delivery(true);
     delivery.makeDeliveryShelfCode(deliveries_id[1]).then(data => {
-      expect(data).toBe("AA");
-      expect(data.length).toBe(2);
+      expect(data.shelf_code).toBe("AA");
+      expect(data.exist).toBe(true);
+      expect(data.shelf_code.length).toBe(2);
       done();
     });
   });
@@ -92,8 +94,9 @@ describe('making shelf code', () => {
     this.done = done;
     let delivery = new Delivery(true);
     delivery.makeDeliveryShelfCode(deliveries_id[2]).then(data => {
-      expect(data).toBe("--");
-      expect(data.length).toBe(2);
+      expect(data.shelf_code).toBe("--");
+      expect(data.shelf_code.length).toBe(2);
+      expect(data.exist).toBe(false);
       done();
     });
   });
@@ -150,7 +153,7 @@ describe('making shelf code', () => {
 
         }
       ];
-      deliveries_id=deliveries.map(d=>d._id);
+      deliveries_id = deliveries.map(d => d._id);
       return models['DeliveryTest'].insertMany(deliveries)
     }).then(() => {
       done();
@@ -164,7 +167,8 @@ describe('making shelf code', () => {
     this.done = done;
     let delivery = new Delivery(true);
     delivery.makeDeliveryShelfCode(deliveries_id[3]).then(data => {
-      expect(data).toBe("AA");
+      expect(data.shelf_code).toBe("AA");
+      expect(data.exist).toBe(false);
       done();
     });
   });

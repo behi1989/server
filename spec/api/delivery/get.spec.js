@@ -152,10 +152,10 @@ describe("it should get delivery's data", () => {
     }).then(res => {
       expect(res.statusCode).toBe(200);
       let result = JSON.parse(res.body)[0];
-      console.log(JSON.stringify(result, undefined, 2));
+      console.log(JSON.stringify(result.to, undefined, 2));
       expect(result.from.warehouse[0].name).toBe(warehouses.find(x => x.is_hub).name);
-      expect(result.to.customer[0].name).toBe(customers[0].name);
-      expect(result.to.customer[0].address_id).toBe(customers[0].addresses[0]._id);
+      expect(result.to.customer[0].first_name).toBe(customers[0].first_name);
+      expect(mongoose.Types.ObjectId(result.to.customer_address_id)).toBe(mongoose.Types.ObjectId(customers[0].addresses[0]._id));
       expect(result.shelf_code).toBe(deliveries[0].shelf_code);
       expect(mongoose.Types.ObjectId(result._id).toString()).toBe(deliveries[0]._id.toString());
       done();
