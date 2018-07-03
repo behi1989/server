@@ -134,16 +134,15 @@ describe("it should get delivery's data", () => {
     }).then(res => {
       expect(res.statusCode).toBe(200);
       let result = JSON.parse(res.body)[0];
-      console.log(JSON.stringify(result, undefined, 2));
-      expect(result.to.warehouse[0].name).toBe(warehouses.find(x => !x.is_hub && !x.has_customer_pickup).name);
-      expect(result.from.warehouse[0].name).toBe(warehouses.find(x => x.is_hub).name);
+      expect(result.to.warehouse.name).toBe(warehouses.find(x => !x.is_hub && !x.has_customer_pickup).name);
+      expect(result.from.warehouse.name).toBe(warehouses.find(x => x.is_hub).name);
       expect(result.shelf_code).toBe(deliveries[1].shelf_code);
       expect(mongoose.Types.ObjectId(result._id).toString()).toBe(deliveries[1]._id.toString());
       done();
     }).catch(lib.helpers.errorHandler.bind(this));
   });
 
-  it("should get this delivery's data from delivery that gonna send from warehouse to warehouse", function (done) {
+  it("should get this delivery's data from delivery that gonna send from warehouse to customer", function (done) {
     this.done = done;
     rp({
       method: 'get',
@@ -152,15 +151,12 @@ describe("it should get delivery's data", () => {
     }).then(res => {
       expect(res.statusCode).toBe(200);
       let result = JSON.parse(res.body)[0];
-      console.log(JSON.stringify(result.to, undefined, 2));
-      expect(result.from.warehouse[0].name).toBe(warehouses.find(x => x.is_hub).name);
-      expect(result.to.customer[0].first_name).toBe(customers[0].first_name);
-      expect(mongoose.Types.ObjectId(result.to.customer_address_id)).toBe(mongoose.Types.ObjectId(customers[0].addresses[0]._id));
-      expect(result.shelf_code).toBe(deliveries[0].shelf_code);
+      expect(result.from.warehouse.name).toBe(warehouses.find(x => x.is_hub).name);
+      expect(result.to.customer.first_name).toBe(customers[0].first_name);
       expect(mongoose.Types.ObjectId(result._id).toString()).toBe(deliveries[0]._id.toString());
+      expect(mongoose.Types.ObjectId(result.to.customer.addresses._id).toString()).toBe(mongoose.Types.ObjectId(deliveries[0].to.customer.address_id).toString());
+      expect(result.shelf_code).toBe(deliveries[0].shelf_code);
       done();
     }).catch(lib.helpers.errorHandler.bind(this));
   });
-
-})
-;
+});
