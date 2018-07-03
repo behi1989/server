@@ -125,7 +125,7 @@ describe("it should get delivery's data", () => {
     });
   });
 
-  xit("should get this delivery's data from delivery that gonna send from warehouse to warehouse", function (done) {
+  it("should get this delivery's data from delivery that gonna send from warehouse to warehouse", function (done) {
     this.done = done;
     rp({
       method: 'get',
