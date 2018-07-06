@@ -157,7 +157,7 @@ router.get('/tags/:tagGroupName', apiResponse('Tag', 'getTags', false, ['params.
 
 
 // Warehouses
-router.get('/warehouse/all', apiResponse('Warehouse', 'getWarehouses', false, []));
+router.get('/warehouse/all', apiResponse('Warehouse', 'getAll', false, []));
 router.get('/warehouse', apiResponse('Warehouse', 'getShops', false, []));
 
 // Customer
@@ -172,6 +172,18 @@ router.post('/customer/preferences', apiResponse('Customer', 'setPreferences', f
 
 // Order
 
+// Order => Ticket
+router.post('/order/ticket/scan', apiResponse('TicketAction', 'newScan', true, ['body.barcode', 'user'], [_const.ACCESS_LEVEL.HubClerk, _const.ACCESS_LEVEL.ShopClerk]));
+router.post('/order/ticket/invoice', apiResponse('TicketAction', 'requestInvoice', true, ['body.orderId', 'user'], [_const.ACCESS_LEVEL.HubClerk, _const.ACCESS_LEVEL.ShopClerk]));
+router.get('/order/ticket/history/:orderId/:orderLineId', apiResponse('Ticket', 'getHistory', true, ['params', 'body', 'user'], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.ShopClerk]));
+router.get('/order/ticket/history/:orderId/:orderLineId', apiResponse('Ticket', 'getHistoryOrderLine', true, ['params'], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.ShopClerk]));
+router.get('/order/ticket/history/:orderId', apiResponse('Ticket', 'getHistoryOrderByReceiver', true, ['params', 'user'], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.ShopClerk]));
+router.post('/order/return', apiResponse('TicketAction', 'returnOrderLine', false, ['body', 'user']));
+router.post('/order/cancel', apiResponse('TicketAction', 'cancelOrderLine', false, ['body', 'user']));
+
+// Order => api's used by offline system
+router.post('/order/offline/verifyInvoice', apiResponse('Offline', 'verifyInvoice', false, ['body']));
+router.post('/order/offline/verifyOnlineWarehouse', apiResponse('Offline', 'verifyOnlineWarehouse', false, ['body']));
 
 // Wish List
 router.post('/wishlist', apiResponse('Customer', 'AddToWishList', false, ['user', 'body']));
@@ -373,6 +385,14 @@ router.post('/soldout/setFlag', apiResponse('SoldOut', 'setSoldOutFlagOnPI', tru
 router.get('/loyaltygroup', apiResponse('LoyaltyGroup', 'getLoyaltyGroups', true, [], [_const.ACCESS_LEVEL.SalesManager]));
 router.post('/loyaltygroup', apiResponse('LoyaltyGroup', 'upsertLoyaltyGroup', true, ['body'], [_const.ACCESS_LEVEL.SalesManager]));
 router.post('/loyaltygroup/delete', apiResponse('LoyaltyGroup', 'deleteLoyaltyGroup', true, ['body._id'], [_const.ACCESS_LEVEL.SalesManager]));
+
+
+// Delivery
+router.get('/delivery/:id', apiResponse('Delivery', 'getDeliveryData', false, ['params.id']));
+router.post('/delivery/items/:offset/:limit', apiResponse('Delivery', 'getDeliveryItems', true, ['user', 'params.offset', 'params.limit', 'body'], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.ShopClerk, _const.ACCESS_LEVEL.HubClerk]));
+router.get('/delivery/agent', apiResponse('Agent', 'getDeliveryAgents', true, [], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.ShopClerk, _const.ACCESS_LEVEL.HubClerk]));
+router.post('/delivery', apiResponse('Delivery', 'updateDelivery', true, ['user', 'body'], [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.ShopClerk, _const.ACCESS_LEVEL.HubClerk]));
+router.post('/delivery/tracking', apiResponse('Delivery', 'getTrackingDetails', true, ['user', 'body.id', [_const.ACCESS_LEVEL.SalesManager, _const.ACCESS_LEVEL.ShopClerk, _const.ACCESS_LEVEL.HubClerk]]));
 
 // Delivery Duration
 router.get('/deliveryduration', apiResponse('DeliveryDurationInfo', 'getAllDurationInfo', false, []));
