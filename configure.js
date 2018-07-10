@@ -25,7 +25,7 @@ db.dbIsReady()
   })
   .then(res => {
     if (!res || res.length === 0) {
-
+      
       return models['Warehouse'].insertMany(warehouses);
     }
     else
